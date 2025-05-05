@@ -1,0 +1,3 @@
+C:/Users/diana/Desktop/anul3/sem2/PI/Project/cmake-build-debug/CMakeFiles/Project.dir
+C:/Users/diana/Desktop/anul3/sem2/PI/Project/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/diana/Desktop/anul3/sem2/PI/Project/cmake-build-debug/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,21 @@
+{
+	"bmi-installation" : null,
+	"compiler-frontend-variant" : "MSVC",
+	"compiler-id" : "MSVC",
+	"compiler-simulate-id" : "",
+	"config" : "Debug",
+	"cxx-modules" : {},
+	"dir-cur-bld" : "C:/Users/diana/Desktop/anul3/sem2/PI/Project/cmake-build-debug",
+	"dir-cur-src" : "C:/Users/diana/Desktop/anul3/sem2/PI/Project",
+	"dir-top-bld" : "C:/Users/diana/Desktop/anul3/sem2/PI/Project/cmake-build-debug",
+	"dir-top-src" : "C:/Users/diana/Desktop/anul3/sem2/PI/Project",
+	"exports" : [],
+	"forward-modules-from-target-dirs" : [],
+	"include-dirs" : 
+	[
+		"C:\\Users\\diana\\Desktop\\anul3\\sem2\\SI\\OpenCv\\opencv\\build\\include"
+	],
+	"language" : "CXX",
+	"linked-target-dirs" : [],
+	"module-dir" : "C:/Users/diana/Desktop/anul3/sem2/PI/Project/cmake-build-debug/CMakeFiles/Project.dir"
+}
