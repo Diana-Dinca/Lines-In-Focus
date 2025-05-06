@@ -253,11 +253,11 @@ vector<pair<float, float>> hough_transform(Mat input, vector<vector<int>>& accum
         }
     }
     int edgePixels = countNonZero(input);
-    int threshold = max(60, edgePixels / 100); // dynamic threshold = at least 50, or 1% of edge pixels
+    int threshold = max(60, edgePixels / 100);
 
     for (int r = 0; r < rho_steps; r++) {
         for (int t = 0; t < theta_steps; t++) {
-            if (accumulator[r][t] > threshold) { //wherever votes exceed threshold, it’s a line
+            if (accumulator[r][t] > threshold) {
                 float rho = r - rho_max;
                 float theta = t * CV_PI / 180;
                 lines.emplace_back(rho, theta);

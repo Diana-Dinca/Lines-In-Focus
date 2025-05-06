@@ -23,6 +23,4 @@ vector<pair<float, float>> hough_transform(Mat input, vector<vector<int>>& accum
 void draw_hough_lines(Mat& image,vector<pair<float, float>> lines);
 void display_hough_space(const std::vector<std::vector<int>>& accumulator);
 
-//road
-//void detect_lane_lines(Mat original_img, Mat& output, const vector<pair<float, float>>& lines);
 #endif
