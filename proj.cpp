@@ -2,7 +2,9 @@
 #include <opencv2/opencv.hpp>
 #include <cmath>
 #include <vector>
-#include <stack>
+#include <set>
+#include <cmath>
+#include <iostream>
 
 using namespace cv;
 using namespace std;
@@ -301,5 +303,67 @@ void draw_hough_lines(Mat& image, vector<pair<float, float>> lines) {
         cv::line(image, pt1, pt2, Scalar(0, 0, 255), 1);
     }
 }
+//quantize (rho, theta) into bins for approximate match
+pair<int, int> quantize_line(float rho, float theta, int rho_bin = 2, int theta_bin_deg = 2) {
+    int qr = static_cast<int>(round(rho / rho_bin));
+    int qt = static_cast<int>(round(theta * 180.0 / CV_PI / theta_bin_deg));
+    return { qr, qt };
+}
 
+void compare_hough_lines(const vector<pair<float, float>>& custom_lines,
+                         const vector<Vec2f>& opencv_lines, const Mat& grayImage) {
+    int rho_bin = 2;
+    int theta_bin_deg = 2;
+    set<pair<int, int>> custom_set;
+    set<pair<int, int>> opencv_set;
 
+    map<pair<int, int>, pair<float, float>> custom_map; // for drawing FN lines
+
+    for (const auto& l : custom_lines) {
+        auto q = quantize_line(l.first, l.second, rho_bin, theta_bin_deg);
+        custom_set.insert(q);
+        custom_map[q] = l;
+    }
+
+    for (const auto& l : opencv_lines) {
+        auto q = quantize_line(l[0], l[1], rho_bin, theta_bin_deg);
+        opencv_set.insert(q);
+    }
+
+    int TP = 0, FN = 0, FP = 0;
+    vector<pair<float, float>> false_negatives;
+
+    for (const auto& l : custom_set) {
+        if (opencv_set.count(l)) TP++; //found in both implementations
+        else {
+            FN++; //found only by custom
+            false_negatives.push_back(custom_map[l]);
+        }
+    }
+    for (const auto& l : opencv_set) {
+        if (!custom_set.count(l)) FP++; //found only by OpenCv
+    }
+
+    cout << "\n--- Hough Line Comparison Metrics ---\n";
+    cout << "True Positives (shared): " << TP << endl;
+    cout << "False Negatives (only custom): " << FN << endl;
+    cout << "False Positives (only OpenCV): " << FP << endl;
+
+    float precision = TP / float(TP + FP + 1e-6f);
+    cout << "Precision: " << precision << endl;
+
+    Mat img_FN;
+    cvtColor(grayImage, img_FN, COLOR_GRAY2BGR);
+
+    for (const auto& line : false_negatives) {
+        float rho = line.first;
+        float theta = line.second;
+        double a = cos(theta), b = sin(theta);
+        double x0 = a * rho, y0 = b * rho;
+        Point pt1(cvRound(x0 + 1000 * (-b)), cvRound(y0 + 1000 * (a)));
+        Point pt2(cvRound(x0 - 1000 * (-b)), cvRound(y0 - 1000 * (a)));
+        cv::line(img_FN, pt1, pt2, Scalar(255,0,0), 1); // blue line
+    }
+
+    imshow("False Negatives (Custom-only Lines)", img_FN);
+}
