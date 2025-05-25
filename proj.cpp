@@ -367,3 +367,89 @@ void compare_hough_lines(const vector<pair<float, float>>& custom_lines,
 
     imshow("False Negatives (Custom-only Lines)", img_FN);
 }
+
+struct LineData {
+    float rho;
+    float theta;
+    int votes;
+};
+
+vector<pair<float, float>> filter_lines_adaptive(const vector<pair<float, float>>& lines, const vector<vector<int>>& accumulator) {
+    /* Filters out redundant or similar lines based on proximity in rho and theta.
+     * Keeps only the most significant and distinct lines from each group.
+     */
+    float rho_eps = 30.0f; //the max allowed difference in pixels between grouped lines
+    float theta_eps = CV_PI / 180 * 2.5f; //the max allowed difference in theta (in radians)
+    int rho_max = accumulator.size() / 2;
+
+    vector<LineData> scored_lines;
+    for (size_t i = 0; i < lines.size(); ++i) {
+        float rho = lines[i].first;
+        float theta = lines[i].second;
+
+        //index for accumulator
+        int rho_idx = static_cast<int>(round(rho + rho_max));
+        int theta_idx = static_cast<int>(round(theta * 180.0 / CV_PI));
+
+        if (rho_idx < 0 || rho_idx >= accumulator.size() ||
+            theta_idx < 0 || theta_idx >= accumulator[0].size()) {
+            continue;
+        }
+        //number of votes for this line
+        int votes = accumulator[rho_idx][theta_idx];
+        scored_lines.push_back({ rho, theta, votes });
+    }
+    //most relevant lines first
+    sort(scored_lines.begin(), scored_lines.end(),
+        [](const LineData& a, const LineData& b) {
+            return a.votes > b.votes;
+        });
+
+    vector<bool> used(scored_lines.size(), false);
+    vector<pair<float, float>> filtered;
+
+    for (size_t i = 0; i < scored_lines.size(); ++i) {
+        if (used[i]) continue;
+
+        LineData base = scored_lines[i];
+        used[i] = true;
+
+        //group of lines similar to the current base line
+        vector<LineData> group;
+        group.push_back(base);
+
+        for (size_t j = i + 1; j < scored_lines.size(); ++j) {
+            if (used[j]) continue;
+
+            float drho = abs(scored_lines[j].rho - base.rho);
+            float dtheta = abs(scored_lines[j].theta - base.theta);
+            //add to group if line is close in both rho and theta
+            if (drho < rho_eps && dtheta < theta_eps) {
+                group.push_back(scored_lines[j]);
+                used[j] = true;
+            }
+        }
+
+        sort(group.begin(), group.end(),
+            [](const LineData& a, const LineData& b) {
+                return a.rho < b.rho;
+            });
+        //always keep the first line in the group
+        filtered.push_back({ group[0].rho, group[0].theta });
+
+        //add more lines from the group, if distinct enough in rho
+        for (size_t k = 1; k < group.size(); ++k) {
+            bool is_distinct = true;
+            for (size_t l = 0; l < k; ++l) {
+                if (abs(group[k].rho - group[l].rho) < 10) {
+                    is_distinct = false;
+                    break;
+                }
+            }
+            if (is_distinct) filtered.push_back({ group[k].rho, group[k].theta });
+
+            if (filtered.size() >= 2) break;
+        }
+    }
+    return filtered;
+}

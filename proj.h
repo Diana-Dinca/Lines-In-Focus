@@ -24,4 +24,6 @@ void draw_hough_lines(Mat& image,vector<pair<float, float>> lines);
 void display_hough_space(const std::vector<std::vector<int>>& accumulator);
 void compare_hough_lines(const vector<pair<float, float>>& custom_lines,const vector<Vec2f>& opencv_lines,const Mat& grayImage);
 
+vector<pair<float, float>> filter_lines_adaptive(const vector<pair<float, float>>& lines, const vector<vector<int>>& accumulator);
+
 #endif

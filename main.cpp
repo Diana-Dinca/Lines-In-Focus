@@ -13,7 +13,7 @@ int main() {
     }
 
     Mat grayscale = rgb_2_grayscale(source);
-    //imshow("Grayscale", grayscale);
+    imshow("Grayscale", grayscale);
 
     Mat blurred = gaussian_blur(grayscale);
     //imshow("Gaussian Blur", blurred);
@@ -37,12 +37,17 @@ int main() {
     imshow("Custom Canny", hysteresis);
 
     vector<vector<int>> accumulator;
-    Mat output = grayscale.clone();
-    cvtColor(output, output, COLOR_GRAY2BGR);
-    vector<pair<float, float>> lines = hough_transform(hysteresis,accumulator);
+    Mat output_unfiltered = grayscale.clone();
+    Mat output_filtered = grayscale.clone();
+    cvtColor(output_unfiltered, output_unfiltered, COLOR_GRAY2BGR);
+    cvtColor(output_filtered, output_filtered, COLOR_GRAY2BGR);
+    vector<pair<float, float>> all_lines = hough_transform(hysteresis, accumulator);
+    draw_hough_lines(output_unfiltered, all_lines);
+    imshow("Custom Hough Lines (Unfiltered)", output_unfiltered);
+    vector<pair<float, float>> filtered_lines = filter_lines_adaptive(all_lines, accumulator);
+    draw_hough_lines(output_filtered, filtered_lines);
+    imshow("Custom Hough Lines (Filtered)", output_filtered);
     display_hough_space(accumulator);
-    draw_hough_lines(output, lines);
-    imshow("Custom Hough Lines", output);
 
 
     // ----- OpenCV Implementation for comparison -----
@@ -118,7 +123,7 @@ int main() {
 
 
     // ----- Comparison & Metrics -----
-    compare_hough_lines(lines, lines_cv, grayscale);
+    compare_hough_lines(all_lines, lines_cv, grayscale);
 
     waitKey(0);
     return 0;
