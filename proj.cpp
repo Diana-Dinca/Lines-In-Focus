@@ -400,10 +400,7 @@ vector<pair<float, float>> filter_lines_adaptive(const vector<pair<float, float>
         scored_lines.push_back({ rho, theta, votes });
     }
     //most relevant lines first
-    sort(scored_lines.begin(), scored_lines.end(),
-        [](const LineData& a, const LineData& b) {
-            return a.votes > b.votes;
-        });
+    sort(scored_lines.begin(), scored_lines.end(),[](const LineData& a, const LineData& b) {return a.votes > b.votes;});
 
     vector<bool> used(scored_lines.size(), false);
     vector<pair<float, float>> filtered;
@@ -414,7 +411,7 @@ vector<pair<float, float>> filter_lines_adaptive(const vector<pair<float, float>
         LineData base = scored_lines[i];
         used[i] = true;
 
-        //group of lines similar to the current base line
+        //group of lines similar to the current baseline
         vector<LineData> group;
         group.push_back(base);
 
@@ -430,10 +427,8 @@ vector<pair<float, float>> filter_lines_adaptive(const vector<pair<float, float>
             }
         }
 
-        sort(group.begin(), group.end(),
-            [](const LineData& a, const LineData& b) {
-                return a.rho < b.rho;
-            });
+        sort(group.begin(), group.end(),[](const LineData& a, const LineData& b) {return a.rho < b.rho;});
+        
         //always keep the first line in the group
         filtered.push_back({ group[0].rho, group[0].theta });
 

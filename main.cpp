@@ -6,7 +6,7 @@ using namespace std;
 using namespace cv;
 
 int main() {
-    Mat source = imread("C:/Users/diana/Desktop/anul3/sem2/PI/Project/photo5.bmp");
+    Mat source = imread("C:/Users/diana/Desktop/anul3/sem2/PI/Project/photo4.bmp");
     if (source.empty()) {
         cout << "Can't open image!" << endl;
         return -1;
